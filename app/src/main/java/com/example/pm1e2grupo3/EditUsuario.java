@@ -177,9 +177,6 @@ public class EditUsuario extends AppCompatActivity {
         });
     }
 
-    private void onMapReady(GoogleMap) {
-
-    }
 
     public void EditCliente() {
         final String idC = txtid.getText().toString().trim();
