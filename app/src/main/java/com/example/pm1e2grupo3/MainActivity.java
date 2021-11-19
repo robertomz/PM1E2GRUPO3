@@ -2,6 +2,7 @@ package com.example.pm1e2grupo3;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
@@ -35,6 +36,8 @@ public class MainActivity extends AppCompatActivity {
     //RUTA DEL ARCHIVO
     String path = "pm1e2grupo3/api/obtener_datos.php";
 
+    String url = "https://pm1e2grupo3.alzir.hn/usuarios/obtener_datos";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         recyclerView = findViewById(R.id.clientes_recyclerView);
-        manager = new GridLayoutManager(MainActivity.this, 1);
+        manager = new LinearLayoutManager(MainActivity.this);
         recyclerView.setLayoutManager(manager);
         usuarios = new ArrayList<>();
 
@@ -60,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getUsuarios() {
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, domain + path, new Response.Listener<String>() {
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
 

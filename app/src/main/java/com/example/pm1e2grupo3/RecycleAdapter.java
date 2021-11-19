@@ -3,11 +3,13 @@ package com.example.pm1e2grupo3;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -19,6 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.MyViewHolder> {
+
+    private static final String TAG = "Adapter";
 
     private Context mContext;
     private List<Usuarios> usuarios = new ArrayList<>();
@@ -52,7 +56,6 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.MyViewHo
         return new MyViewHolder(view);
     }
 
-    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         final Usuarios usuario = usuarios.get(position);
@@ -60,24 +63,20 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.MyViewHo
         holder.mName.setText(usuario.getNombre());
         holder.mPhone.setText(usuario.getTelefono());
         holder.mGPS.setText("Latitud: " + usuario.getLatitud() + " \nLongitud: " + usuario.getLongitud());
-        Glide.with(mContext).load(usuario.getFoto()).into(holder.mImageView);
+        Glide.with(this.mContext).load("https://pm1e2grupo3.alzir.hn/" + usuario.getFoto()).into(holder.mImageView);
 
-        holder.mContainer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                /*Intent intent = new Intent(mContext,EditarCliente.class);
+        holder.mContainer.setOnClickListener(view -> {
+            Log.d(TAG, "Clicked: " + usuario.getId());
+            Intent intent = new Intent(mContext, EditUsuario.class);
 
-                intent.putExtra("id",cliente.getId());
-                intent.putExtra("primer_nombre",cliente.getPrimerNombre());
-                intent.putExtra("segundo_nombre",cliente.getSegundoNombre());
-                intent.putExtra("primer_apellido",cliente.getPrimerApellido());
-                intent.putExtra("segundo_apellido",cliente.getSegundoApellido());
-                intent.putExtra("correo",cliente.getCorreo());
-                intent.putExtra("telefono",cliente.getTelefono());
-                intent.putExtra("imagen",cliente.getImagen());
+            intent.putExtra("id", usuario.getId());
+            intent.putExtra("nombre", usuario.getNombre());
+            intent.putExtra("telefono", usuario.getTelefono());
+            intent.putExtra("latitud", usuario.getLatitud());
+            intent.putExtra("longitud", usuario.getLongitud());
+            intent.putExtra("foto", usuario.getFoto());
 
-                mContext.startActivity(intent);*/
-            }
+            mContext.startActivity(intent);
         });
     }
 
@@ -85,6 +84,4 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.MyViewHo
     public int getItemCount() {
         return usuarios.size();
     }
-
-
 }
