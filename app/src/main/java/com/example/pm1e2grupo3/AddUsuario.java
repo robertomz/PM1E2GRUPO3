@@ -1,13 +1,23 @@
 package com.example.pm1e2grupo3;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Base64;
@@ -31,15 +41,19 @@ import com.karumi.dexter.listener.single.PermissionListener;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
-public class AddUsuario extends Activity {
+public class AddUsuario extends Activity implements LocationListener {
 
     RequestQueue requestQueue;
     EditText txtNombre, txtTelefono, txtLatitud, txtLongitud;
     ImageView img;
     Bitmap bitmap;
     String encodeImage;
+
+    LocationManager locationManager;
 
     //DIRECCION API
     String domain = "http://192.168.0.17/";
@@ -86,6 +100,16 @@ public class AddUsuario extends Activity {
                         }).check();
             }
         });
+
+        //PERMISO DE UBICACION
+        if (ContextCompat.checkSelfPermission(AddUsuario.this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(AddUsuario.this,new String[]{
+                    Manifest.permission.ACCESS_FINE_LOCATION
+            },100);
+        }
+
+        getLocation();
 
         //GUARDAR
         Button btnGuardar = (Button) findViewById(R.id.btnGuardar);
@@ -172,5 +196,47 @@ public class AddUsuario extends Activity {
     public void onBackPressed() {
         super.onBackPressed();
         finish();
+    }
+
+    //METODOS PARA OBTENER LA UBICACION
+    @Override
+    public void onLocationChanged(@NonNull Location location) {
+        try {
+            Geocoder geocoder = new Geocoder(AddUsuario.this, Locale.getDefault());
+            List<Address> addresses = geocoder.getFromLocation(location.getLatitude(),location.getLongitude(),1);
+            String address = addresses.get(0).getAddressLine(0);
+
+            txtLatitud.setText(String.valueOf(location.getLatitude()));
+            txtLongitud.setText(String.valueOf(location.getLongitude()));
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(@NonNull String provider) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(@NonNull String provider) {
+
+    }
+
+    @SuppressLint("MissingPermission")
+    private void getLocation() {
+        try {
+            locationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,5000,5,AddUsuario.this);
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 }
