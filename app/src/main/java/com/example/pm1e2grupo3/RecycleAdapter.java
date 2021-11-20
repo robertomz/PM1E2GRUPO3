@@ -2,7 +2,9 @@ package com.example.pm1e2grupo3;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,11 +14,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,17 +71,40 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.MyViewHo
         Glide.with(this.mContext).load("https://pm1e2grupo3.alzir.hn/" + usuario.getFoto()).into(holder.mImageView);
 
         holder.mContainer.setOnClickListener(view -> {
-            Log.d(TAG, "Clicked: " + usuario.getId());
-            Intent intent = new Intent(mContext, EditUsuario.class);
+            final CharSequence[] options = { "Editar Usuario", "Ver Ubicación","Cancelar" };
+            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+            builder.setTitle("Seleccione una opción");
+            builder.setItems(options, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int item) {
+                    if (options[item].equals("Editar Usuario")){
+                        Log.d(TAG, "Clicked: " + usuario.getId());
+                        Intent intent = new Intent(mContext, EditUsuario.class);
 
-            intent.putExtra("id", usuario.getId());
-            intent.putExtra("nombre", usuario.getNombre());
-            intent.putExtra("telefono", usuario.getTelefono());
-            intent.putExtra("latitud", usuario.getLatitud());
-            intent.putExtra("longitud", usuario.getLongitud());
-            intent.putExtra("foto", usuario.getFoto());
+                        intent.putExtra("id", usuario.getId());
+                        intent.putExtra("nombre", usuario.getNombre());
+                        intent.putExtra("telefono", usuario.getTelefono());
+                        intent.putExtra("latitud", usuario.getLatitud());
+                        intent.putExtra("longitud", usuario.getLongitud());
+                        intent.putExtra("foto", usuario.getFoto());
 
-            mContext.startActivity(intent);
+                        mContext.startActivity(intent);
+                    }
+                    else if (options[item].equals("Ver Ubicación")){
+                        Log.d(TAG, "Clicked: " + usuario.getId());
+                        Intent intent = new Intent(mContext, MapsActivity.class);
+                        intent.putExtra("nombre", usuario.getNombre());
+                        intent.putExtra("latitud", usuario.getLatitud());
+                        intent.putExtra("longitud", usuario.getLongitud());
+
+                        mContext.startActivity(intent);
+                    }
+                    else if (options[item].equals("Cancelar")){
+                        dialog.dismiss();
+                    }
+                }
+            });
+            builder.show();
         });
     }
 

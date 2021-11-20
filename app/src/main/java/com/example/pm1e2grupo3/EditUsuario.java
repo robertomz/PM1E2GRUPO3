@@ -78,12 +78,12 @@ public class EditUsuario extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_usuario);
 
-        txtid = findViewById(R.id.txtID);
-        txtNombreA = findViewById(R.id.txtNombreA);
-        txtTelefonoA = findViewById(R.id.txtTelefonoA);
-        txtLatitudA = findViewById(R.id.txtLatitudA);
-        txtLongitudA = findViewById(R.id.txtLongitudA);
-        imgA = findViewById(R.id.imgClienteA);
+        txtid = (TextView) findViewById(R.id.txtID);
+        txtNombreA = (EditText) findViewById(R.id.txtNombreA);
+        txtTelefonoA = (EditText) findViewById(R.id.txtTelefonoA);
+        txtLatitudA = (EditText) findViewById(R.id.txtLatitudA);
+        txtLongitudA = (EditText) findViewById(R.id.txtLongitudA);
+        imgA = (ImageView) findViewById(R.id.imgClienteA);
 
         Intent intent = getIntent();
 
@@ -185,13 +185,13 @@ public class EditUsuario extends AppCompatActivity {
         final String latitud = txtLatitudA.getText().toString().trim();
         final String longitud = txtLongitudA.getText().toString().trim();
 
+
         final ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Cargando...");
 
-        if (nombre.isEmpty() || telefono.isEmpty() || latitud.isEmpty() || longitud.isEmpty() || encodeImage.isEmpty()) {
+        if (nombre.isEmpty() || telefono.isEmpty() || latitud.isEmpty() || longitud.isEmpty() || (encodeImage.isEmpty() || encodeImage == null)) {
             Toast.makeText(EditUsuario.this, "LLene todos los campos!", Toast.LENGTH_SHORT).show();
-        }
-        else {
+        }else {
             progressDialog.show();
             StringRequest request = new StringRequest(Request.Method.POST, urlEdit,
                     new Response.Listener<String>() {
