@@ -102,8 +102,6 @@ public class EditUsuario extends AppCompatActivity {
         imgA = (ImageView) findViewById(R.id.imgClienteA);
 
         edicionCampos(false);
-        txtLatitudA.setEnabled(false);
-        txtLongitudA.setEnabled(false);
 
         Intent intent = getIntent();
 
@@ -243,6 +241,8 @@ public class EditUsuario extends AppCompatActivity {
     public void edicionCampos(boolean param){
         txtNombreA.setEnabled(param);
         txtTelefonoA.setEnabled(param);
+        txtLongitudA.setEnabled(param);
+        txtLatitudA.setEnabled(param);
     }
 
 

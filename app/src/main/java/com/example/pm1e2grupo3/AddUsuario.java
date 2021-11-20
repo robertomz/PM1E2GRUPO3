@@ -59,6 +59,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -119,39 +120,9 @@ public class AddUsuario extends Activity {
             Manifest.permission.ACCESS_COARSE_LOCATION}, 100);
         }
 
-        //CARGAR IMAGEN
-        /*img.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //OBTENER IMAGEN DE GALERIA
-                Dexter.withContext(AddUsuario.this)
-                        .withPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
-                        .withListener(new PermissionListener() {
-                            @Override
-                            public void onPermissionGranted(PermissionGrantedResponse permissionGrantedResponse) {
-                                Intent intent = new Intent(Intent.ACTION_PICK);
-                                intent.setType("image/*");
-                                startActivityForResult(Intent.createChooser(intent, "Buscar Imagen"), 1);
-                            }
-
-                            @Override
-                            public void onPermissionDenied(PermissionDeniedResponse permissionDeniedResponse) {
-
-                            }
-
-                            @Override
-                            public void onPermissionRationaleShouldBeShown(PermissionRequest permissionRequest, PermissionToken permissionToken) {
-                                permissionToken.continuePermissionRequest();
-                            }
-                        }).check();
-                //FIN OBTENER IMAGEN DE GALERIA
-            }
-        });*/
-
         //GUARDAR
         Button btnGuardar = (Button) findViewById(R.id.btnGuardar);
 
-        //btnGuardar.setOnClickListener(view -> saveUsuario());
 
         btnGuardar.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -223,6 +194,7 @@ public class AddUsuario extends Activity {
             TakePhotoDir();
         }
     }
+
 
     private void TakePhotoDir() {
         Intent Intenttakephoto= new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -404,6 +376,7 @@ public class AddUsuario extends Activity {
 
                                 txtLatitud.setText(String.valueOf(location1.getLatitude()));
                                 txtLongitud.setText(String.valueOf(location1.getLongitude()));
+
                             }
                         };
 

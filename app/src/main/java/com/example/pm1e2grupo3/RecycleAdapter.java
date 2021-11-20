@@ -91,13 +91,34 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.MyViewHo
                         mContext.startActivity(intent);
                     }
                     else if (options[item].equals("Ver Ubicación")){
-                        Log.d(TAG, "Clicked: " + usuario.getId());
-                        Intent intent = new Intent(mContext, MapsActivity.class);
-                        intent.putExtra("nombre", usuario.getNombre());
-                        intent.putExtra("latitud", usuario.getLatitud());
-                        intent.putExtra("longitud", usuario.getLongitud());
+                        final CharSequence[] optionsUbicaciones = { "Ver Ubicacion", "Ver inDrive","Cancelar" };
+                        AlertDialog.Builder builderUbicaciones = new AlertDialog.Builder(mContext);
+                        builderUbicaciones.setTitle("Seleccione una opción");
+                        builderUbicaciones.setItems(optionsUbicaciones, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int item) {
+                                Intent intent = new Intent(mContext, MapsActivity.class);
+                                intent.putExtra("nombre", usuario.getNombre());
+                                intent.putExtra("latitud", usuario.getLatitud());
+                                intent.putExtra("longitud", usuario.getLongitud());
+                                if (optionsUbicaciones[item].equals("Ver Ubicacion")){
+                                    Log.d(TAG, "Clicked: " + usuario.getId());
+                                    intent.putExtra("inDriver", "false");
+                                    mContext.startActivity(intent);
+                                }
+                                else if (optionsUbicaciones[item].equals("Ver inDrive")){
+                                    Log.d(TAG, "Clicked: " + usuario.getId());
+                                    intent.putExtra("inDriver", "true");
 
-                        mContext.startActivity(intent);
+                                    mContext.startActivity(intent);
+                                }
+                                else if (optionsUbicaciones[item].equals("Cancelar")){
+                                    dialog.dismiss();
+                                }
+                            }
+                        });
+                        builderUbicaciones.show();
+
                     }
                     else if (options[item].equals("Cancelar")){
                         dialog.dismiss();

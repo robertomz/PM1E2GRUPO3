@@ -81,7 +81,7 @@
             android:layout_height="48dp"
             android:layout_margin="10dp"
             android:layout_weight="1"
-            android:inputType="textPersonName"
+            android:inputType="number"
             android:text=""
             tools:ignore="SpeakableTextPresentCheck" />
 
@@ -99,7 +99,7 @@
             android:layout_height="48dp"
             android:layout_margin="10dp"
             android:layout_weight="1"
-            android:inputType="textPersonName"
+            android:inputType="number"
             android:text=""
             tools:ignore="SpeakableTextPresentCheck" />
 
