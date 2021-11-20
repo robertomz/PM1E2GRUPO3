@@ -2,14 +2,17 @@ package com.example.pm1e2grupo3;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -18,10 +21,11 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Looper;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.Base64;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -52,7 +56,12 @@ import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -64,6 +73,11 @@ public class EditUsuario extends AppCompatActivity {
     ImageView imgA;
     Bitmap bitmap;
     String encodeImage;
+    static final int REQUEST_IMAGE_CAPTURE = 1;
+    static final int PETICION_ACCESO_CAN = 101;
+    Boolean tomarFoto;
+    String currentPhotoPath;
+    Uri filepath;
 
     LocationManager locationManager;
 
@@ -78,12 +92,18 @@ public class EditUsuario extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_usuario);
 
+
+
         txtid = (TextView) findViewById(R.id.txtID);
         txtNombreA = (EditText) findViewById(R.id.txtNombreA);
         txtTelefonoA = (EditText) findViewById(R.id.txtTelefonoA);
         txtLatitudA = (EditText) findViewById(R.id.txtLatitudA);
         txtLongitudA = (EditText) findViewById(R.id.txtLongitudA);
         imgA = (ImageView) findViewById(R.id.imgClienteA);
+
+        edicionCampos(false);
+        txtLatitudA.setEnabled(false);
+        txtLongitudA.setEnabled(false);
 
         Intent intent = getIntent();
 
@@ -114,31 +134,13 @@ public class EditUsuario extends AppCompatActivity {
         });
 
         //EDITAR IMAGEN / CARGAR IMAGEN
-        imgA = (ImageView) findViewById(R.id.imgClienteA);
+        Button btnSubir = (Button) findViewById(R.id.btnSubirImagen);
 
-        imgA.setOnClickListener(new View.OnClickListener() {
+        btnSubir.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Dexter.withContext(EditUsuario.this)
-                        .withPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
-                        .withListener(new PermissionListener() {
-                            @Override
-                            public void onPermissionGranted(PermissionGrantedResponse permissionGrantedResponse) {
-                                Intent intent = new Intent(Intent.ACTION_PICK);
-                                intent.setType("image/*");
-                                startActivityForResult(Intent.createChooser(intent, "Buscar Imagen"), 1);
-                            }
-
-                            @Override
-                            public void onPermissionDenied(PermissionDeniedResponse permissionDeniedResponse) {
-
-                            }
-
-                            @Override
-                            public void onPermissionRationaleShouldBeShown(PermissionRequest permissionRequest, PermissionToken permissionToken) {
-                                permissionToken.continuePermissionRequest();
-                            }
-                        }).check();
+                tomarFoto();
+                edicionCampos(true);
             }
         });
 
@@ -165,33 +167,103 @@ public class EditUsuario extends AppCompatActivity {
                 EditCliente();
             }
         });
+    }
 
-        //IR AL MAPA
-        Button btnMapa = (Button) findViewById(R.id.btnMapa);
-
-        btnMapa.setOnClickListener(new View.OnClickListener() {
+    private void tomarFoto() {
+        final CharSequence[] options = { "Tomar Foto", "Seleccionar de galeria","Cancelar" };
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Agregar una Imagen!");
+        builder.setItems(options, new DialogInterface.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(DialogInterface dialog, int item) {
+                if (options[item].equals("Tomar Foto")) {
+                    permisos();
+                    tomarFoto = true;
+                } else if (options[item].equals("Seleccionar de galeria")) {
+                    tomarFoto = false;
+                    //OBTENER IMAGEN DE GALERIA
+                    Dexter.withContext(EditUsuario.this)
+                            .withPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+                            .withListener(new PermissionListener() {
+                                @Override
+                                public void onPermissionGranted(PermissionGrantedResponse permissionGrantedResponse) {
+                                    Intent intent = new Intent(Intent.ACTION_PICK);
+                                    intent.setType("image/*");
+                                    startActivityForResult(Intent.createChooser(intent, "Buscar Imagen"), 1);
+                                }
 
+                                @Override
+                                public void onPermissionDenied(PermissionDeniedResponse permissionDeniedResponse) {
+
+                                }
+
+                                @Override
+                                public void onPermissionRationaleShouldBeShown(PermissionRequest permissionRequest, PermissionToken permissionToken) {
+                                    permissionToken.continuePermissionRequest();
+                                }
+                            }).check();
+                    //FIN OBTENER IMAGEN DE GALERIA
+                } else if (options[item].equals("Cancelar")) {
+                    dialog.dismiss();
+                    edicionCampos(false);
+                }
             }
         });
+        builder.show();
+    }
+
+    private void permisos() {
+        //VALIDAR PERMISO QUE ESTA OTORGADO
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED){
+            //otorga el permiso si no lo tengo
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, PETICION_ACCESO_CAN);
+        }else{
+            TakePhotoDir();
+        }
+    }
+
+    private void TakePhotoDir() {
+        Intent Intenttakephoto= new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (Intenttakephoto.resolveActivity(getPackageManager()) != null){
+            File foto = null;
+            try {
+                foto = createImageFile();
+            }
+            catch (Exception ex){
+                ex.toString();
+            }
+            if (foto!= null){
+                filepath = FileProvider.getUriForFile(getApplicationContext(), "com.example.pm1e2grupo3.fileprovider",foto);
+                Intenttakephoto.putExtra(MediaStore.EXTRA_OUTPUT, filepath);
+                startActivityForResult(Intenttakephoto, REQUEST_IMAGE_CAPTURE);
+            }
+        }
+    }
+
+    public void edicionCampos(boolean param){
+        txtNombreA.setEnabled(param);
+        txtTelefonoA.setEnabled(param);
     }
 
 
     public void EditCliente() {
-        final String idC = txtid.getText().toString().trim();
-        final String nombre = txtNombreA.getText().toString().trim();
-        final String telefono = txtTelefonoA.getText().toString().trim();
-        final String latitud = txtLatitudA.getText().toString().trim();
-        final String longitud = txtLongitudA.getText().toString().trim();
+        String idC = txtid.getText().toString().trim();
+        String nombre = txtNombreA.getText().toString().trim();
+        String telefono = txtTelefonoA.getText().toString().trim();
+        String latitud = txtLatitudA.getText().toString().trim();
+        String longitud = txtLongitudA.getText().toString().trim();
 
+        boolean pError;
 
         final ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Cargando...");
 
-        if (nombre.isEmpty() || telefono.isEmpty() || latitud.isEmpty() || longitud.isEmpty() || (encodeImage.isEmpty() || encodeImage == null)) {
+        if (nombre.isEmpty() || telefono.isEmpty()
+                || latitud.isEmpty() || longitud.isEmpty() || (encodeImage.isEmpty() || encodeImage == null)) {
             Toast.makeText(EditUsuario.this, "LLene todos los campos!", Toast.LENGTH_SHORT).show();
+            pError = true;
         }else {
+            pError = false;
             progressDialog.show();
             StringRequest request = new StringRequest(Request.Method.POST, urlEdit,
                     new Response.Listener<String>() {
@@ -221,8 +293,14 @@ public class EditUsuario extends AppCompatActivity {
                 }
             };
 
-            RequestQueue requestQueue = Volley.newRequestQueue(EditUsuario.this);
-            requestQueue.add(request);;
+            if(!pError){
+                RequestQueue requestQueue = Volley.newRequestQueue(EditUsuario.this);
+                requestQueue.add(request);
+            }
+
+            edicionCampos(false);
+
+
         }
     }
 
@@ -257,19 +335,36 @@ public class EditUsuario extends AppCompatActivity {
     //CODIGO DE IMAGEN
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (requestCode == 1 && resultCode == RESULT_OK) {
-            Uri filepath = data.getData();
-
-            try {
-                InputStream inputStream = getContentResolver().openInputStream(filepath);
-                bitmap = BitmapFactory.decodeStream(inputStream);
-                imgA.setImageBitmap(bitmap);
-                encodeBitmapImage(bitmap);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
         super.onActivityResult(requestCode, resultCode, data);
+
+        if(tomarFoto){
+            if (requestCode == REQUEST_IMAGE_CAPTURE  && resultCode == RESULT_OK) {
+                Bitmap bitmap;
+                try {
+                    bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), filepath);
+                    encodeBitmapImage(bitmap);
+                    imgA.setImageBitmap(bitmap);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }else{
+            if (requestCode == 1 && resultCode == RESULT_OK) {
+                filepath = data.getData();
+
+                try {
+                    InputStream inputStream = getContentResolver().openInputStream(filepath);
+                    bitmap = BitmapFactory.decodeStream(inputStream);
+                    imgA.setImageBitmap(bitmap);
+                    encodeBitmapImage(bitmap);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+
+        }
     }
 
     private void encodeBitmapImage(Bitmap bitmap) {
@@ -335,5 +430,18 @@ public class EditUsuario extends AppCompatActivity {
             startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
                     .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
         }
+    }
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName, /* prefix */
+                ".jpg", /* suffix */
+                storageDir /* directory */);
+        // Save a file: path for use with ACTION_VIEW
+        currentPhotoPath = image.getAbsolutePath();
+        return image;
     }
 }

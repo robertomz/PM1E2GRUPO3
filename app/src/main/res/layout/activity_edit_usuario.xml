@@ -104,10 +104,19 @@
             tools:ignore="SpeakableTextPresentCheck" />
 
         <LinearLayout
-            android:layout_marginTop="5dp"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="80dp"
+            android:layout_marginTop="5dp"
             android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnSubirImagen"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_weight="1"
+                android:text="Imagen" />
+
             <Button
                 android:id="@+id/btnEditar"
                 android:layout_width="wrap_content"
@@ -124,13 +133,6 @@
                 android:layout_weight="1"
                 android:text="Eliminar" />
 
-            <Button
-                android:id="@+id/btnMapa"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:layout_weight="1"
-                android:text="Ir al Mapa" />
         </LinearLayout>
 
     </LinearLayout>
